@@ -1,0 +1,32 @@
+2025-03-11 15:37:04,299 - __main__ - INFO - Starting dashboard application
+2025-03-11 15:37:04,301 - __main__ - INFO - Fetching total engagements
+2025-03-11 15:37:06,226 - __main__ - INFO - Found 44 total engagements
+2025-03-11 15:37:06,227 - __main__ - INFO - Fetching successful engagements
+2025-03-11 15:37:06,930 - __main__ - INFO - Calculating success ratio
+2025-03-11 15:37:06,930 - __main__ - INFO - Fetching total engagements
+2025-03-11 15:37:07,692 - __main__ - INFO - Found 44 total engagements
+2025-03-11 15:37:07,694 - __main__ - INFO - Fetching successful engagements
+2025-03-11 15:37:08,429 - __main__ - INFO - Success ratio: 90.91%
+2025-03-11 15:37:08,429 - __main__ - INFO - Fetching celebrity engagement data
+2025-03-11 15:37:09,192 - __main__ - INFO - Found 5 celebrity records
+2025-03-11 15:37:09,192 - __main__ - INFO - Fetching user engagement data
+2025-03-11 15:37:10,015 - __main__ - INFO - Found 5 user records
+2025-03-11 15:37:10,016 - __main__ - INFO - Fetching engagement time series data
+2025-03-11 15:37:10,816 - __main__ - INFO - Fetching rerun comparison data using Excel formula logic
+2025-03-11 15:37:11,600 - __main__ - INFO - Metrics found - Initial: {'likes': 27, 'retweets': 3, 'comments': 2}, Rerun: {'likes': 34, 'retweets': 4, 'comments': 2}
+2025-03-11 15:42:17,454 - __main__ - INFO - Starting dashboard application
+2025-03-11 15:42:17,488 - __main__ - INFO - Fetching total engagements
+2025-03-11 15:42:18,465 - __main__ - INFO - Found 44 total engagements
+2025-03-11 15:42:18,466 - __main__ - INFO - Fetching successful engagements
+2025-03-11 15:42:19,199 - __main__ - INFO - Calculating success ratio
+2025-03-11 15:42:19,199 - __main__ - INFO - Fetching total engagements
+2025-03-11 15:42:19,990 - __main__ - INFO - Found 44 total engagements
+2025-03-11 15:42:19,991 - __main__ - INFO - Fetching successful engagements
+2025-03-11 15:42:20,771 - __main__ - INFO - Success ratio: 90.91%
+2025-03-11 15:42:20,772 - __main__ - INFO - Fetching celebrity engagement data
+2025-03-11 15:42:21,638 - __main__ - INFO - Found 5 celebrity records
+2025-03-11 15:42:21,640 - __main__ - INFO - Fetching user engagement data
+2025-03-11 15:42:22,420 - __main__ - INFO - Found 5 user records
+2025-03-11 15:42:22,435 - __main__ - INFO - Fetching engagement time series data
+2025-03-11 15:42:23,357 - __main__ - INFO - Fetching rerun comparison data using Excel formula logic
+2025-03-11 15:42:24,141 - __main__ - INFO - Metrics found - Initial: {'likes': 27, 'retweets': 3, 'comments': 2}, Rerun: {'likes': 34, 'retweets': 4, 'comments': 2}

@@ -1,0 +1,13 @@
+[project]
+name = "deploy-dashboard"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.2.3",
+    "plotly>=6.0.0",
+    "pymongo>=4.11.2",
+    "python-dotenv>=1.0.1",
+    "streamlit>=1.43.1",
+]

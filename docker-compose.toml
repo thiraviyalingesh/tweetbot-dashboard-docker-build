@@ -1,0 +1,10 @@
+[compose]
+version = "3"
+
+[services.dashboard]
+build.context = "."
+build.dockerfile = "Dockerfile"
+ports = ["8501:8501"]
+env_file = [".env"]
+volumes = [".:/app"]
+restart = "unless-stopped"
