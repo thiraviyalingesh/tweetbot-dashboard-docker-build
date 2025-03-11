@@ -1092,7 +1092,7 @@ def main():
                 
                 # Add title with better styling
                 title=dict(
-                    text='Daily Engagement Trends',
+                    text='',
                     font=dict(size=16, color='#333333', family='Arial, sans-serif'),
                     x=0.5,  # Center title
                     y=0.98  # Adjusted position
@@ -1116,27 +1116,30 @@ def main():
 
     # Create a single set of columns for both headers and charts
     col1, col2 = st.columns([1, 1])
-    
-    # Celebrity Engagements - Column 1
+
+    # Top 5 Celebrity Engagements
     with col1:
-        # Header
+        # Add header
         st.markdown("""
             <div style="background: #722F37; padding: 15px; border-radius: 15px; margin: 20px 0;">
                 <h2 style="color: #F5DEB3; font-size: 24px; margin: 0;">Top 5 Celebrity Engagements</h2>
             </div>
         """, unsafe_allow_html=True)
-        
-        # Chart
+
         if not celebrity_data.empty:
-            celebrity_data = celebrity_data.sort_values('engagements', ascending=False).head(5)
+            # Sort in descending order by engagements
+            celebrity_data = celebrity_data.sort_values('engagements', ascending=False)
+            
+            # For horizontal bar charts, we need to REVERSE the order for proper display
+            reversed_username_array = celebrity_data['username'].tolist()[::-1]
             
             fig = go.Figure()
             fig.add_trace(go.Bar(
-                y=celebrity_data['username'][::-1],
-                x=celebrity_data['engagements'][::-1],
+                y=celebrity_data['username'],
+                x=celebrity_data['engagements'],
                 orientation='h',
                 marker_color='#3498db',
-                text=celebrity_data['engagements'][::-1],
+                text=celebrity_data['engagements'],
                 textposition='outside',
                 textfont=dict(size=14, color='#000000', family='Arial Black')
             ))
@@ -1156,47 +1159,42 @@ def main():
                     tickfont=dict(size=12, color='#000000', family='Arial Black')
                 ),
                 yaxis=dict(
+                    categoryorder='array',
+                    categoryarray=reversed_username_array,
                     showgrid=False,
                     showticklabels=True,
                     showline=True,
                     linewidth=1,
                     linecolor='black',
-                    tickfont=dict(size=12, color='#000000', family='Arial Black'),
-                    categoryorder='total descending'
-                ),
-                shapes=[
-                    dict(
-                        type='rect',
-                        xref='paper', yref='paper',
-                        x0=0, y0=0, x1=1, y1=1,
-                        line=dict(color='#b0bec5', width=1),
-                        fillcolor='rgba(0,0,0,0)'
-                    )
-                ]
+                    tickfont=dict(size=12, color='#000000', family='Arial Black')
+                )
             )
             
             st.plotly_chart(fig, use_container_width=True)
-    
+
     # User Engagements - Column 2
     with col2:
-        # Header
+        # Add header
         st.markdown("""
             <div style="background: #722F37; padding: 15px; border-radius: 15px; margin: 20px 0;">
                 <h2 style="color: #F5DEB3; font-size: 24px; margin: 0;">Top 5 User Engagements</h2>
             </div>
         """, unsafe_allow_html=True)
-        
-        # Chart
+
         if not user_data.empty:
-            user_data = user_data.sort_values('engagements', ascending=False).head(5)
+            # Sort in descending order by engagements
+            user_data = user_data.sort_values('engagements', ascending=False)
+            
+            # For horizontal bar charts, we need to REVERSE the order for proper display
+            reversed_name_array = user_data['name'].tolist()[::-1]
             
             fig = go.Figure()
             fig.add_trace(go.Bar(
-                y=user_data['name'][::-1],
-                x=user_data['engagements'][::-1],
+                y=user_data['name'],
+                x=user_data['engagements'],
                 orientation='h',
                 marker_color='#3498db',
-                text=user_data['engagements'][::-1],
+                text=user_data['engagements'],
                 textposition='outside',
                 textfont=dict(size=14, color='#000000', family='Arial Black')
             ))
@@ -1216,23 +1214,15 @@ def main():
                     tickfont=dict(size=12, color='#000000', family='Arial Black')
                 ),
                 yaxis=dict(
+                    categoryorder='array',
+                    categoryarray=reversed_name_array,
                     showgrid=False,
                     showticklabels=True,
                     showline=True,
                     linewidth=1,
                     linecolor='black',
-                    tickfont=dict(size=12, color='#000000', family='Arial Black'),
-                    categoryorder='total descending'
-                ),
-                shapes=[
-                    dict(
-                        type='rect',
-                        xref='paper', yref='paper',
-                        x0=0, y0=0, x1=1, y1=1,
-                        line=dict(color='#b0bec5', width=1),
-                        fillcolor='rgba(0,0,0,0)'
-                    )
-                ]
+                    tickfont=dict(size=12, color='#000000', family='Arial Black')
+                )
             )
             
             st.plotly_chart(fig, use_container_width=True)
