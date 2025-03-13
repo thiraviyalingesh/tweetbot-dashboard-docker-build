@@ -2,22 +2,25 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy only necessary files
-COPY pyproject.toml uv.lock full-report.py ./
+COPY . /app
 
 COPY --from=ghcr.io/astral-sh/uv:0.4.9 /uv /bin/uv
 
-# Install dependencies using uv
 RUN /bin/uv sync
-RUN /bin/uv install streamlit pandas plotly pymongo python-dotenv
+RUN /bin/uv add streamlit
+RUN /bin/uv add pandas plotly pymongo python-dotenv
 
-# Set non-sensitive environment variables
+# Set environment variables
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
+
+# Google Cloud Run sets PORT environment variable, default to 8080 if not set
 ENV PORT=8080
 
-# Sensitive environment variables (MONGODB_URI, MONGODB_DATABASE) 
-# will be set in Google Cloud Run's configuration
+RUN bash -c "source /app/.venv/bin/activate && export PATH=\"/app/.venv/bin:\$PATH\""
 
-CMD streamlit run full-report.py --server.port=$PORT --server.address=0.0.0.0
+# Change the ENTRYPOINT to bash
+ENTRYPOINT ["/bin/bash", "-c"]
 
+# MongoDB credentials will be passed as environment variables at runtime
+CMD ["source /app/.venv/bin/activate && exec streamlit run full-report.py --server.port=$PORT --server.address=0.0.0.0"]
