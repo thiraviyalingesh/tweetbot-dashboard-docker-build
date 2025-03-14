@@ -567,23 +567,29 @@ def get_engagement_time_series():
 
 def get_celebrity_engagement_data():
     """
-    Fetches and aggregates engagement counts by celebrity tweet.
+    Fetches and aggregates engagement counts by celebrity tweet with case-insensitive matching.
     """
     try:
-        logger.info("Fetching celebrity engagement data")
+        print("Starting celebrity data fetch with case-insensitive matching...")
         client = pymongo.MongoClient(MONGODB_URI)
         db = client[MONGODB_DATABASE]
         collection = db["twitter_actions"]
         
+        # Case-insensitive aggregation pipeline
         pipeline = [
             {
                 "$match": {
-                    "username": {"$exists": True, "$ne": None}
+                    "username": {
+                        "$exists": True, 
+                        "$ne": None
+                    }
                 }
             },
             {
+                # Convert username to lowercase for grouping
                 "$group": {
-                    "_id": "$username",
+                    "_id": {"$toLower": "$username"},  # Case-insensitive grouping
+                    "originalName": {"$first": "$username"},  # Keep one original username
                     "engagements": {"$sum": 1}
                 }
             },
@@ -596,21 +602,33 @@ def get_celebrity_engagement_data():
         ]
         
         result = list(collection.aggregate(pipeline))
+        print(f"Aggregation result: {result}")
+        
         client.close()
         
         if result:
-            df = pd.DataFrame(result)
-            df = df.rename(columns={"_id": "username", "engagements": "engagements"})
+            # Convert to DataFrame with proper column names
+            df = pd.DataFrame([
+                {
+                    "username": doc["originalName"],
+                    "engagements": doc["engagements"]
+                } for doc in result
+            ])
+            
             # Clean up usernames (remove @ if present)
-            df['username'] = df['username'].apply(lambda x: x.replace('@', '') if isinstance(x, str) and x.startswith('@') else x)
-            logger.info(f"Found {len(df)} celebrity records")
+            df['username'] = df['username'].apply(
+                lambda x: x.replace('@', '') if isinstance(x, str) and x.startswith('@') else x
+            )
+            
+            print("Final DataFrame with case-insensitive aggregation:")
+            print(df)
             return df
         
-        logger.warning("No celebrity engagement data found")
+        print("No celebrity engagement data found")
         return pd.DataFrame(columns=['username', 'engagements'])
         
     except Exception as e:
-        logger.error(f"Error fetching celebrity data: {str(e)}")
+        print(f"Error in celebrity data fetch: {str(e)}")
         return pd.DataFrame(columns=['username', 'engagements'])
 
 def get_user_engagement_data():
@@ -956,9 +974,29 @@ def main():
             )
         )
 
-        # Auto-scale bars inside the chart area
-        max_likes = max(rerun_data['initial']['likes'], rerun_data['rerun']['likes'])
-        fig_combined.update_yaxes(range=[0, max_likes + 5])
+        # Find the maximum value across all bars
+        max_value = max([
+            rerun_data['initial']['likes'],
+            rerun_data['initial']['retweets'],
+            rerun_data['initial']['comments'],
+            rerun_data['rerun']['likes'],
+            rerun_data['rerun']['retweets'],
+            rerun_data['rerun']['comments']
+        ])
+
+        # Add some padding (20% more than max value)
+        y_axis_max = max_value * 1.2
+
+        # Update the layout with the new y-axis range
+        fig_combined.update_layout(
+            yaxis=dict(
+                range=[0, y_axis_max],  # Set the range from 0 to max_value + 20%
+                showgrid=False,
+                showticklabels=False,
+                showline=False,
+                zeroline=False
+            )
+        )
 
         # Add a border around the entire plot
         fig_combined.update_layout(
@@ -1039,6 +1077,12 @@ def main():
     # Right column - Daily Engagement Trends
     with col2:
         if not time_series_data.empty:
+            # Find maximum value
+            max_value = time_series_data['engagements'].max()
+            
+            # Calculate a proportional minimum value based on max_value
+            fixed_min = -max_value * 0.05  # Just 5% of max value as padding below zero
+            
             fig_trends = go.Figure()
             fig_trends.add_trace(go.Scatter(
                 x=time_series_data['date'],
@@ -1062,17 +1106,24 @@ def main():
                 ),
                 showlegend=False
             ))
-            
+
             fig_trends.update_layout(
-                # Background colors - matching Rerun Facility chart
-                plot_bgcolor='#FAF3E0',  # Cream background color
-                paper_bgcolor='#FAF3E0', # Same cream background
-                
-                # Size and margins - matching Rerun Facility chart
-                height=400,  # Increased height to match
-                margin=dict(l=40, r=40, t=60, b=50),  # Adjusted margins
-                
-                # Hide axes
+                plot_bgcolor='#FAF3E0',
+                paper_bgcolor='#FAF3E0',
+                height=400,  # Back to original height
+                margin=dict(l=40, r=40, t=60, b=60),  # Adjusted margins
+                yaxis=dict(
+                    range=[fixed_min, max_value * 1.15],  # Reduced top padding to 15%
+                    showgrid=False,
+                    showticklabels=True,
+                    showline=True,
+                    linewidth=1,
+                    linecolor='black',
+                    tickfont=dict(size=12, color='#000000', family='Arial Black'),
+                    zeroline=True,
+                    zerolinecolor='black',
+                    zerolinewidth=1
+                ),
                 xaxis=dict(
                     showgrid=False,
                     showticklabels=True,
@@ -1080,42 +1131,19 @@ def main():
                     linewidth=1,
                     linecolor='black',
                     tickfont=dict(size=12, color='#000000', family='Arial Black')
-                ),
-                yaxis=dict(
-                    showgrid=False,
-                    showticklabels=True,
-                    showline=True,
-                    linewidth=1,
-                    linecolor='black',
-                    tickfont=dict(size=12, color='#000000', family='Arial Black')
-                ),
-                
-                # Add title with better styling
-                title=dict(
-                    text='',
-                    font=dict(size=16, color='#333333', family='Arial, sans-serif'),
-                    x=0.5,  # Center title
-                    y=0.98  # Adjusted position
                 )
             )
-            
-            # Add a border around the entire plot
-            fig_trends.update_layout(
-                shapes=[
-                    dict(
-                        type='rect',
-                        xref='paper', yref='paper',
-                        x0=0, y0=0, x1=1, y1=1,
-                        line=dict(color='#b0bec5', width=1),  # Softer gray border
-                        fillcolor='rgba(0,0,0,0)'
-                    )
-                ]
-            )
-            
+
             st.plotly_chart(fig_trends, use_container_width=True)
 
     # Create a single set of columns for both headers and charts
     col1, col2 = st.columns([1, 1])
+
+    # For both Celebrity and User Engagements charts
+    # Calculate maximum text width padding based on the values
+    def get_max_text_padding(values):
+        max_value = max(values)
+        return max_value * 0.15  # 15% padding for text
 
     # Top 5 Celebrity Engagements
     with col1:
@@ -1129,9 +1157,10 @@ def main():
         if not celebrity_data.empty:
             # Sort in descending order by engagements
             celebrity_data = celebrity_data.sort_values('engagements', ascending=False)
-            
-            # For horizontal bar charts, we need to REVERSE the order for proper display
             reversed_username_array = celebrity_data['username'].tolist()[::-1]
+            
+            # Calculate padding
+            text_padding = get_max_text_padding(celebrity_data['engagements'])
             
             fig = go.Figure()
             fig.add_trace(go.Bar(
@@ -1148,9 +1177,10 @@ def main():
                 plot_bgcolor='#FAF3E0',
                 paper_bgcolor='#FAF3E0',
                 height=300,
-                margin=dict(l=20, r=20, t=20, b=20),
+                margin=dict(l=20, r=100, t=20, b=20),  # Increased right margin
                 showlegend=False,
                 xaxis=dict(
+                    range=[0, max(celebrity_data['engagements']) + text_padding],  # Add padding for text
                     showgrid=False,
                     showticklabels=True,
                     showline=True,
@@ -1184,9 +1214,10 @@ def main():
         if not user_data.empty:
             # Sort in descending order by engagements
             user_data = user_data.sort_values('engagements', ascending=False)
-            
-            # For horizontal bar charts, we need to REVERSE the order for proper display
             reversed_name_array = user_data['name'].tolist()[::-1]
+            
+            # Calculate padding
+            text_padding = get_max_text_padding(user_data['engagements'])
             
             fig = go.Figure()
             fig.add_trace(go.Bar(
@@ -1203,9 +1234,10 @@ def main():
                 plot_bgcolor='#FAF3E0',
                 paper_bgcolor='#FAF3E0',
                 height=300,
-                margin=dict(l=20, r=20, t=20, b=20),
+                margin=dict(l=20, r=100, t=20, b=20),  # Increased right margin
                 showlegend=False,
                 xaxis=dict(
+                    range=[0, max(user_data['engagements']) + text_padding],  # Add padding for text
                     showgrid=False,
                     showticklabels=True,
                     showline=True,
