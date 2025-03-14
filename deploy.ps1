@@ -34,12 +34,12 @@ if (-not (Test-Path -Path ".gitignore")) {
 
 # Step 3: Build Docker image
 Write-Host "Building Docker image..." -ForegroundColor Cyan
-docker build -t buzztracker-tweetbot-dashboard .
+docker build -t tweetbot-analytics-dashboard .
 
 # Step 4: Check for existing containers and remove them
 Write-Host "Checking for existing containers..." -ForegroundColor Cyan
-docker stop tweet-dashboard 2>$null
-docker rm tweet-dashboard 2>$null
+docker stop tweetbot-analytics-dashboard 2>$null
+docker rm tweetbot-analytics-dashboard 2>$null
 
 # Step 5: Run container with environment variables from .env file
 Write-Host "Starting container..." -ForegroundColor Cyan
@@ -50,17 +50,17 @@ $mongodb_database = ($env_content | Where-Object { $_ -match "MONGODB_DATABASE="
 
 # Run Docker container with environment variables
 docker run -d `
-  --name tweet-dashboard `
+  --name tweetbot-analytics-dashboard `
   -p 8080:8080 `
   -e MONGODB_URI="$mongodb_uri" `
   -e MONGODB_DATABASE="$mongodb_database" `
-  buzztracker-tweetbot-dashboard
+  tweetbot-analytics-dashboard
 
 # Step 6: Check if container is running
-$container_running = docker ps -q -f name=tweet-dashboard
+$container_running = docker ps -q -f name=tweetbot-analytics-dashboard
 if ($container_running) {
     Write-Host "BuzzTracker TweetBot Dashboard deployed successfully!" -ForegroundColor Green
     Write-Host "Access the dashboard at http://localhost:8080" -ForegroundColor Green
 } else {
-    Write-Host "Deployment failed. Check Docker logs with: docker logs tweet-dashboard" -ForegroundColor Red
+    Write-Host "Deployment failed. Check Docker logs with: docker logs tweetbot-analytics-dashboard" -ForegroundColor Red
 }
