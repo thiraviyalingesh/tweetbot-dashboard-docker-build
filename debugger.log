@@ -5903,3 +5903,17 @@ TypeError: Object of type ObjectId is not JSON serializable
 2025-03-14 14:41:19,450 - __main__ - INFO - Fetching engagement time series data
 2025-03-14 14:41:20,549 - __main__ - INFO - Fetching rerun comparison data using Excel formula logic
 2025-03-14 14:41:21,892 - __main__ - INFO - Metrics found - Initial: {'likes': 453, 'retweets': 432, 'comments': 597}, Rerun: {'likes': 501, 'retweets': 464, 'comments': 652}
+2025-03-14 15:17:08,382 - __main__ - INFO - Starting dashboard application
+2025-03-14 15:17:08,386 - __main__ - INFO - Fetching total engagements
+2025-03-14 15:17:09,135 - __main__ - INFO - Found 1726 total engagements
+2025-03-14 15:17:09,136 - __main__ - INFO - Fetching successful engagements
+2025-03-14 15:17:09,750 - __main__ - INFO - Calculating success ratio
+2025-03-14 15:17:09,756 - __main__ - INFO - Fetching total engagements
+2025-03-14 15:17:10,391 - __main__ - INFO - Found 1726 total engagements
+2025-03-14 15:17:10,391 - __main__ - INFO - Fetching successful engagements
+2025-03-14 15:17:11,056 - __main__ - INFO - Success ratio: 93.63%
+2025-03-14 15:17:11,697 - __main__ - INFO - Fetching user engagement data
+2025-03-14 15:17:12,282 - __main__ - INFO - Found 5 user records
+2025-03-14 15:17:12,282 - __main__ - INFO - Fetching engagement time series data
+2025-03-14 15:17:12,995 - __main__ - INFO - Fetching rerun comparison data using Excel formula logic
+2025-03-14 15:17:13,787 - __main__ - INFO - Metrics found - Initial: {'likes': 453, 'retweets': 432, 'comments': 597}, Rerun: {'likes': 501, 'retweets': 464, 'comments': 652}
