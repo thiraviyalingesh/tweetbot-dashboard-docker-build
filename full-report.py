@@ -143,28 +143,33 @@ st.markdown("""
     }
     
     /* Button styling */
-    .stButton>button {
-        background-color: #1DA1F2;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        padding: 8px 15px;
-        font-weight: 600;
-        transition: all 0.2s ease;
+    .stButton > button, .stDownloadButton > button {
+        width: 100% !important;
+        height: 60px !important;
+        border-radius: 5px !important;
+        font-weight: 600 !important;
+        font-size: 16px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+        color: white !important;
+        border: none !important;
     }
     
-    .stButton>button:hover {
-        background-color: #0c80cf;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    /* Refresh button styling (Twitter blue) */
+    .stButton > button {
+        background-color: #1DA1F2 !important;
     }
     
-    /* Last updated text */
-    .last-updated {
-        color: #555;
-        font-size: 12px;
-        font-style: italic;
-        margin-left: 15px;
+    /* Excel button styling (Excel green) */
+    .stDownloadButton > button {
+        background-color: #008000 !important;
     }
+    
+    /* Hover effects */
+    .stButton > button:hover, .stDownloadButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+    }
+    
     .refresh-button {
     background: linear-gradient(45deg, #2193b0, #6dd5ed);
     color: white;
@@ -780,7 +785,79 @@ def get_rerun_comparison_data():
             "initial": {"likes": 0, "retweets": 0, "comments": 0},  # Changed from "reposts" to "retweets"
             "rerun": {"likes": 0, "retweets": 0, "comments": 0}  # Changed from "reposts" to "retweets"
         }
-
+def get_engagement_time_series_with_filter(start_date=None, end_date=None):
+    """
+    Fetches engagement time series data for a specified date range.
+    
+    Args:
+        start_date (datetime, optional): Start date for filtering
+        end_date (datetime, optional): End date for filtering
+    
+    Returns:
+        pandas.DataFrame: DataFrame with date and engagement counts
+    """
+    try:
+        logger.info(f"Fetching engagement time series data from {start_date} to {end_date}")
+        client = pymongo.MongoClient(MONGODB_URI)
+        db = client[MONGODB_DATABASE]
+        collection = db["twitter_actions"]
+        
+        # If no dates provided, default to last 7 days
+        if start_date is None or end_date is None:
+            # Get current date in UTC and set time to end of day
+            end_date = datetime.utcnow().replace(hour=23, minute=59, second=59)
+            # Get start date as 6 days ago (to get exactly 7 days including today)
+            start_date = (end_date - timedelta(days=6)).replace(hour=0, minute=0, second=0)
+        
+        pipeline = [
+            {
+                "$match": {
+                    "date": {
+                        "$gte": start_date,
+                        "$lte": end_date
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "$dateToString": {
+                            "format": "%Y-%m-%d",
+                            "date": "$date"
+                        }
+                    },
+                    "engagements": {"$sum": 1}
+                }
+            },
+            {
+                "$sort": {"_id": 1}
+            }
+        ]
+        
+        result = list(collection.aggregate(pipeline))
+        client.close()
+        
+        # Convert to DataFrame and handle missing dates
+        df = pd.DataFrame(result)
+        if not df.empty:
+            df = df.rename(columns={"_id": "date", "engagements": "engagements"})
+            df['date'] = pd.to_datetime(df['date'])
+            
+            # Create complete date range for the filtered period
+            date_range = pd.date_range(start=start_date.date(), end=end_date.date(), freq='D')
+            all_dates = pd.DataFrame({'date': date_range})
+            
+            # Merge with actual data and fill missing values
+            df = pd.merge(all_dates, df, on='date', how='left')
+            df['engagements'] = df['engagements'].fillna(0)
+            
+            return df
+        return pd.DataFrame()
+        
+    except Exception as e:
+        logger.error(f"Error fetching time series data: {str(e)}")
+        return pd.DataFrame()
+    
 def main():
     """Main function to run the Streamlit dashboard."""
     logger.info("Starting dashboard application")
@@ -792,17 +869,39 @@ def main():
         </h1>
     """, unsafe_allow_html=True)
     
-    # Single column for refresh button
-    col1, col2 = st.columns([1, 11])
+    # # Single column for refresh button
+    # col1, col2 = st.columns([1, 11])
     
+    # # Refresh Button
+    # with col1:
+    #     if st.button("🔄 Refresh", use_container_width=True):
+    #         logger.info("Manual refresh triggered")
+    #         st.rerun()
+    
+    # # Add a horizontal line after the controls
+    # st.markdown("<hr style='margin: 1em 0; padding: 0;'>", unsafe_allow_html=True)
+    
+    # Single column for refresh button and download button
+    col1, col2, col3 = st.columns([1, 10, 1])  # Changed from [1, 11] to [1, 1, 10]
+
     # Refresh Button
     with col1:
         if st.button("🔄 Refresh", use_container_width=True):
             logger.info("Manual refresh triggered")
             st.rerun()
-    
-    # Add a horizontal line after the controls
-    st.markdown("<hr style='margin: 1em 0; padding: 0;'>", unsafe_allow_html=True)
+            
+    with col3:
+        # Get your data for CSV
+        time_series_data = get_engagement_time_series()  # Replace with your actual function
+        csv = time_series_data.to_csv(index=False)
+        
+        st.download_button(
+            label="📊 Excel",
+            data=csv,
+            file_name=f"tweet_engagements_{datetime.now().strftime('%Y-%m-%d')}.csv",
+            mime="text/csv",
+            use_container_width=True
+        )
     
     # Get all required data
     total_engagements = get_total_engagements()
@@ -948,7 +1047,7 @@ def main():
             paper_bgcolor='#FAF3E0', # Same cream background
             
             # Size and margins
-            height=400,  # Increased height for better visualization
+            height=520,  # Increased height for better visualization
             margin=dict(l=40, r=40, t=60, b=50),  # Adjusted margins
             
             # Hide axes
@@ -1076,10 +1175,164 @@ def main():
     
     # Right column - Daily Engagement Trends
     with col2:
+        # Date filter section - ADD THIS NEW SECTION
+        # Create a container for the date filter buttons
+        filter_container = st.container()
+        date_filter_col1, date_filter_col2, date_filter_col3, date_filter_col4, date_filter_col5 = filter_container.columns(5)
+        
+        # Store the currently selected filter in session state
+        if 'date_filter_selected' not in st.session_state:
+            st.session_state.date_filter_selected = 'last7d'
+        
+        # Store custom date range in session state
+        if 'custom_start_date' not in st.session_state:
+            # Default to 7 days ago
+            st.session_state.custom_start_date = (datetime.now() - timedelta(days=6)).date()
+        
+        if 'custom_end_date' not in st.session_state:
+            # Default to today
+            st.session_state.custom_end_date = datetime.now().date()
+        
+        # Current date for calculations
+        today = datetime.now()
+        
+        # Date filter buttons with styling matching the dashboard
+        filter_buttons_html = """
+        <style>
+        .date-filter-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .date-filter-button {
+            background-color: #722F37;
+            color: #F5DEB3;
+            border: none;
+            border-radius: 5px;
+            padding: 6px 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            flex-grow: 1;
+            min-width: 60px;
+        }
+        .date-filter-button:hover {
+            background-color: #8a3a45;
+        }
+        .date-filter-button.active {
+            background-color: #8a3a45;
+            border: 1px solid #F5DEB3;
+        }
+        </style>
+        """
+        
+        st.markdown(filter_buttons_html, unsafe_allow_html=True)
+        
+        # Button selection logic
+        with date_filter_col1:
+            last7d_active = "active" if st.session_state.date_filter_selected == "last7d" else ""
+            if st.button("Last 7d", key="last7d", use_container_width=True, 
+                       help="View data from the last 7 days"):
+                st.session_state.date_filter_selected = "last7d"
+                
+        with date_filter_col2:
+            last30d_active = "active" if st.session_state.date_filter_selected == "last30d" else ""
+            if st.button("Last 30d", key="last30d", use_container_width=True,
+                       help="View data from the last 30 days"):
+                st.session_state.date_filter_selected = "last30d"
+                
+        with date_filter_col3:
+            lastQ_active = "active" if st.session_state.date_filter_selected == "lastQ" else ""
+            if st.button("Last Q", key="lastQ", use_container_width=True,
+                       help="View data from the last quarter"):
+                st.session_state.date_filter_selected = "lastQ"
+                
+        with date_filter_col4:
+            ytd_active = "active" if st.session_state.date_filter_selected == "ytd" else ""
+            if st.button("YTD", key="ytd", use_container_width=True,
+                       help="View data year to date"):
+                st.session_state.date_filter_selected = "ytd"
+                
+        with date_filter_col5:
+            custom_active = "active" if st.session_state.date_filter_selected == "custom" else ""
+            if st.button("Custom", key="custom", use_container_width=True,
+                       help="Select a custom date range"):
+                st.session_state.date_filter_selected = "custom"
+        
+        # Show custom date selector if custom filter is selected
+        if st.session_state.date_filter_selected == "custom":
+            custom_col1, custom_col2 = st.columns(2)
+            
+            with custom_col1:
+                selected_start = st.date_input(
+                    "Start Date",
+                    value=st.session_state.custom_start_date,
+                    max_value=today
+                )
+                st.session_state.custom_start_date = selected_start
+                
+            with custom_col2:
+                selected_end = st.date_input(
+                    "End Date",
+                    value=st.session_state.custom_end_date,
+                    max_value=today
+                )
+                st.session_state.custom_end_date = selected_end
+        
+        # Calculate date range based on selected filter
+        end_date = datetime.now().replace(hour=23, minute=59, second=59)
+        
+        if st.session_state.date_filter_selected == "last7d":
+            start_date = (end_date - timedelta(days=6)).replace(hour=0, minute=0, second=0)
+        elif st.session_state.date_filter_selected == "last30d":
+            start_date = (end_date - timedelta(days=29)).replace(hour=0, minute=0, second=0)
+        elif st.session_state.date_filter_selected == "lastQ":
+            # Calculate start of the last quarter
+            current_month = end_date.month
+            quarter_month = ((current_month - 1) // 3) * 3 + 1
+            if quarter_month == current_month:
+                # If we're in the first month of a quarter, get previous quarter
+                if current_month == 1:
+                    start_date = datetime(end_date.year - 1, 10, 1)
+                else:
+                    start_date = datetime(end_date.year, quarter_month - 3, 1)
+            else:
+                start_date = datetime(end_date.year, quarter_month, 1)
+        elif st.session_state.date_filter_selected == "ytd":
+            start_date = datetime(end_date.year, 1, 1)
+        else:  # custom
+            start_date = datetime.combine(st.session_state.custom_start_date, datetime.min.time())
+            end_date = datetime.combine(st.session_state.custom_end_date, datetime.max.time())
+        
+        # Get filtered time series data
+        time_series_data = get_engagement_time_series_with_filter(start_date, end_date)
+        
+        # Display a date range indicator
+        formatted_start = start_date.strftime("%b %d, %Y")
+        formatted_end = end_date.strftime("%b %d, %Y")
+        
+        st.markdown(f"""
+        <div style="background-color: #FAF3E0; padding: 8px 15px; border-radius: 5px; margin-bottom: 10px; display: flex; align-items: center;">
+            <span style="color: #722F37; font-weight: 600; font-size: 14px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 6px;">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                Currently viewing: {formatted_start} - {formatted_end}
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
+        
         if not time_series_data.empty:
             # Find maximum value
             max_value = time_series_data['engagements'].max()
-            
+            if max_value == 0:
+                max_value = 1  # Prevent division by zero if no data
+                
             # Calculate a proportional minimum value based on max_value
             fixed_min = -max_value * 0.05  # Just 5% of max value as padding below zero
             
@@ -1111,7 +1364,7 @@ def main():
                 plot_bgcolor='#FAF3E0',
                 paper_bgcolor='#FAF3E0',
                 height=400,  # Back to original height
-                margin=dict(l=40, r=40, t=60, b=60),  # Adjusted margins
+                margin=dict(l=40, r=40, t=10, b=60),  # Reduced top margin to accommodate filter buttons
                 yaxis=dict(
                     range=[fixed_min, max_value * 1.15],  # Reduced top padding to 15%
                     showgrid=False,
@@ -1135,9 +1388,12 @@ def main():
             )
 
             st.plotly_chart(fig_trends, use_container_width=True)
+        else:
+            st.info("No data available for the selected date range.")
 
     # Create a single set of columns for both headers and charts
     col1, col2 = st.columns([1, 1])
+
 
     # For both Celebrity and User Engagements charts
     # Calculate maximum text width padding based on the values
@@ -1176,7 +1432,7 @@ def main():
             fig.update_layout(
                 plot_bgcolor='#FAF3E0',
                 paper_bgcolor='#FAF3E0',
-                height=300,
+                height=450,
                 margin=dict(l=20, r=100, t=20, b=20),  # Increased right margin
                 showlegend=False,
                 xaxis=dict(
@@ -1233,7 +1489,7 @@ def main():
             fig.update_layout(
                 plot_bgcolor='#FAF3E0',
                 paper_bgcolor='#FAF3E0',
-                height=300,
+                height=450,
                 margin=dict(l=20, r=100, t=20, b=20),  # Increased right margin
                 showlegend=False,
                 xaxis=dict(
