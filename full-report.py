@@ -9,7 +9,6 @@ import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime, timedelta
 import logging
-import json
 
 # Configure logging
 logging.basicConfig(
@@ -857,6 +856,65 @@ def get_engagement_time_series_with_filter(start_date=None, end_date=None):
     except Exception as e:
         logger.error(f"Error fetching time series data: {str(e)}")
         return pd.DataFrame()
+def generate_raw_data_csv():
+    """
+    Generate a CSV file with all raw data directly from the database.
+    Handles potential data type issues with robust error handling.
+    
+    Returns:
+        str: CSV data as string
+    """
+    try:
+        # Connect to MongoDB
+        client = pymongo.MongoClient(MONGODB_URI)
+        db = client[MONGODB_DATABASE]
+        collection = db["twitter_actions"]
+        
+        # Fetch ALL data from the database without any filtering
+        all_data = list(collection.find({}, {"_id": 0}))  # Exclude MongoDB IDs
+        
+        # Convert to DataFrame
+        if all_data:
+            df = pd.DataFrame(all_data)
+            
+            # Handle date conversion with robust error handling
+            if 'date' in df.columns:
+                # First convert any problematic data types to strings
+                df['date'] = df['date'].apply(lambda x: str(x) if not isinstance(x, (str, datetime)) else x)
+                
+                # Then try to parse dates with error handling
+                def safe_date_parse(date_str):
+                    try:
+                        if pd.isna(date_str) or date_str == '':
+                            return date_str
+                        return pd.to_datetime(date_str)
+                    except:
+                        return date_str  # Keep as string if parsing fails
+                
+                # Apply safe conversion
+                df['date'] = df['date'].apply(safe_date_parse)
+                
+                # Format dates where conversion succeeded
+                df['date'] = df['date'].apply(
+                    lambda x: x.strftime('%Y-%m-%d %H:%M:%S') if isinstance(x, datetime) else x
+                )
+            
+            # Convert to CSV
+            csv_data = df.to_csv(index=False)
+            return csv_data
+        else:
+            # Return empty CSV with headers if no data
+            return "No data found"
+        
+    except Exception as e:
+        logger.error(f"Error generating raw data CSV: {str(e)}")
+        # Create a simple error message CSV
+        error_df = pd.DataFrame({"Error": [f"Failed to generate data: {str(e)}"]})
+        return error_df.to_csv(index=False)
+    finally:
+        # Make sure we close the connection
+        if 'client' in locals():
+            client.close()
     
 def main():
     """Main function to run the Streamlit dashboard."""
@@ -891,17 +949,16 @@ def main():
             st.rerun()
             
     with col3:
-        # Get your data for CSV
-        time_series_data = get_engagement_time_series()  # Replace with your actual function
-        csv = time_series_data.to_csv(index=False)
-        
-        st.download_button(
-            label="📊 Excel",
-            data=csv,
-            file_name=f"tweet_engagements_{datetime.now().strftime('%Y-%m-%d')}.csv",
+        # Direct download of raw data when button is clicked
+        if st.download_button(
+            label="Download CSV",
+            data=generate_raw_data_csv(),  # Generate data directly on click
+            file_name=f"Buzztracker_Tweetbot_DB_Data_{datetime.now().strftime('%Y-%m-%d')}.csv", 
             mime="text/csv",
             use_container_width=True
-        )
+        ):
+            # This will run after download but no UI will show
+            logger.info("Raw data export triggered")
     
     # Get all required data
     total_engagements = get_total_engagements()
@@ -1327,6 +1384,9 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
+        # This code completely removes zero values from the time series chart
+        # Place this inside the "with col2:" section after the date range indicator
+
         if not time_series_data.empty:
             # Find maximum value
             max_value = time_series_data['engagements'].max()
@@ -1336,10 +1396,31 @@ def main():
             # Calculate a proportional minimum value based on max_value
             fixed_min = -max_value * 0.05  # Just 5% of max value as padding below zero
             
+            # Create separate datasets for non-zero values (visible) and zero values (for line continuity)
+            visible_df = time_series_data.copy()
+            
+            # For the visible trace, we'll create an array of texts that only shows non-zero values
+            text_array = []
+            for value in visible_df['engagements']:
+                if value == 0:
+                    text_array.append("")  # Empty string for zero values
+                else:
+                    text_array.append(str(int(value)))  # Show labels for non-zero values
+            
+            # Create a custom size array that hides zero markers completely
+            size_array = []
+            for value in visible_df['engagements']:
+                if value == 0:
+                    size_array.append(0)  # Zero size makes the marker invisible
+                else:
+                    size_array.append(10)  # Normal size for non-zero values
+            
             fig_trends = go.Figure()
+            
+            # Add the main trace with conditional marker sizes to hide zeros
             fig_trends.add_trace(go.Scatter(
-                x=time_series_data['date'],
-                y=time_series_data['engagements'],
+                x=visible_df['date'],
+                y=visible_df['engagements'],
                 mode='lines+markers+text',
                 name='Engagements',
                 line=dict(
@@ -1349,13 +1430,15 @@ def main():
                     smoothing=1.3
                 ),
                 marker=dict(
-                    size=10,
+                    size=size_array,  # Use our size array to hide zero markers
                     color='#1DA1F2'
                 ),
-                text=time_series_data['engagements'].astype(int),
+                text=text_array,  # Use our conditional text array
                 textposition='top center',
                 textfont=dict(
-                    size=14, color='#000000', family='Arial Black'
+                    size=14, 
+                    color='#000000', 
+                    family='Arial Black'
                 ),
                 showlegend=False
             ))
@@ -1363,10 +1446,10 @@ def main():
             fig_trends.update_layout(
                 plot_bgcolor='#FAF3E0',
                 paper_bgcolor='#FAF3E0',
-                height=400,  # Back to original height
-                margin=dict(l=40, r=40, t=10, b=60),  # Reduced top margin to accommodate filter buttons
+                height=400,
+                margin=dict(l=40, r=40, t=10, b=60),
                 yaxis=dict(
-                    range=[fixed_min, max_value * 1.15],  # Reduced top padding to 15%
+                    range=[fixed_min, max_value * 1.15],
                     showgrid=False,
                     showticklabels=True,
                     showline=True,
@@ -1386,6 +1469,14 @@ def main():
                     tickfont=dict(size=12, color='#000000', family='Arial Black')
                 )
             )
+            
+            # For better readability with few points (like Last 7d view)
+            if len(time_series_data) <= 10:
+                # Ensure x-axis has nice breaks for short date ranges
+                fig_trends.update_xaxes(
+                    dtick="D1",  # Daily ticks
+                    tickformat="%b %d"  # Format as "Mar 12"
+                )
 
             st.plotly_chart(fig_trends, use_container_width=True)
         else:
