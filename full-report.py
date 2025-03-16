@@ -9,17 +9,18 @@ import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime, timedelta
 import logging
+from logger import setup_logger, log_dataframe
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler("debugger.log"),
         logging.StreamHandler()
     ]
 )
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 # Page configuration with dark theme
 st.set_page_config(
@@ -417,7 +418,7 @@ def get_total_engagements():
         int: Total count of unique engagements
     """
     try:
-        logger.info("Fetching total engagements")
+        logger.debug("Fetching total engagements")
         # Connect to MongoDB
         client = pymongo.MongoClient(MONGODB_URI)
         db = client[MONGODB_DATABASE]
@@ -432,7 +433,7 @@ def get_total_engagements():
         # Close connection
         client.close()
         
-        logger.info(f"Found {total_count} total engagements")
+        logger.debug(f"Found {total_count} total engagements")
         return total_count
     except Exception as e:
         logger.error(f"MongoDB Connection Error: {str(e)}")
@@ -449,7 +450,7 @@ def get_successful_engagements():
         int: Total count of successful engagements
     """
     try:
-        logger.info("Fetching successful engagements")
+        logger.debug("Fetching successful engagements")
         # Connect to MongoDB
         client = pymongo.MongoClient(MONGODB_URI)
         db = client[MONGODB_DATABASE]
@@ -488,7 +489,7 @@ def get_success_ratio():
         float: Percentage of successful engagements
     """
     try:
-        logger.info("Calculating success ratio")
+        logger.debug("Calculating success ratio")
         # Get total and successful counts
         total = get_total_engagements()
         successful = get_successful_engagements()
@@ -496,7 +497,7 @@ def get_success_ratio():
         # Calculate percentage
         if total > 0:
             ratio = (successful / total) * 100
-            logger.info(f"Success ratio: {ratio:.2f}%")
+            logger.debug(f"Success ratio: {ratio:.2f}%")
             return ratio
         else:
             logger.warning("No engagements found for success ratio calculation")
@@ -510,7 +511,7 @@ def get_engagement_time_series():
     Fetches engagement time series data for exactly the last 7 days.
     """
     try:
-        logger.info("Fetching engagement time series data")
+        logger.debug("Fetching engagement time series data")
         client = pymongo.MongoClient(MONGODB_URI)
         db = client[MONGODB_DATABASE]
         collection = db["twitter_actions"]
@@ -648,7 +649,7 @@ def get_user_engagement_data():
         Returns empty DataFrame with appropriate error message on failure
     """
     try:
-        logger.info("Fetching user engagement data")
+        logger.debug("Fetching user engagement data")
         client = pymongo.MongoClient(MONGODB_URI)
         db = client[MONGODB_DATABASE]
         collection = db["twitter_actions"]
@@ -668,7 +669,7 @@ def get_user_engagement_data():
         df = pd.DataFrame(result)
         if not df.empty:
             df = df.rename(columns={"_id": "name", "count": "engagements"})
-            logger.info(f"Found {len(df)} user records")
+            logger.debug(f"Found {len(df)} user records")
             return df
         
         logger.warning("No user engagement data found")
@@ -689,7 +690,7 @@ def get_rerun_comparison_data():
     D9, D14 (Comments)
     """
     try:
-        logger.info("Fetching rerun comparison data using Excel formula logic")
+        logger.debug("Fetching rerun comparison data using Excel formula logic")
         client = pymongo.MongoClient(MONGODB_URI)
         db = client[MONGODB_DATABASE]
         collection = db["twitter_actions"]
@@ -775,7 +776,7 @@ def get_rerun_comparison_data():
             logger.warning("No rerun comparison data found")
             return metrics
 
-        logger.info(f"Metrics found - Initial: {metrics['initial']}, Rerun: {metrics['rerun']}")
+        logger.debug(f"Metrics found - Initial: {metrics['initial']}, Rerun: {metrics['rerun']}")
         return metrics
 
     except Exception as e:
@@ -796,7 +797,7 @@ def get_engagement_time_series_with_filter(start_date=None, end_date=None):
         pandas.DataFrame: DataFrame with date and engagement counts
     """
     try:
-        logger.info(f"Fetching engagement time series data from {start_date} to {end_date}")
+        logger.debug(f"Fetching engagement time series data from {start_date} to {end_date}")
         client = pymongo.MongoClient(MONGODB_URI)
         db = client[MONGODB_DATABASE]
         collection = db["twitter_actions"]
@@ -877,10 +878,16 @@ def generate_raw_data_csv():
         if all_data:
             df = pd.DataFrame(all_data)
             
+            # Log initial DataFrame state
+            log_dataframe(logger, df, "Initial Raw Data Before Processing")
+            
             # Handle date conversion with robust error handling
             if 'date' in df.columns:
                 # First convert any problematic data types to strings
                 df['date'] = df['date'].apply(lambda x: str(x) if not isinstance(x, (str, datetime)) else x)
+                
+                # Log after initial date conversion
+                log_dataframe(logger, df, "After Date String Conversion")
                 
                 # Then try to parse dates with error handling
                 def safe_date_parse(date_str):
@@ -898,18 +905,23 @@ def generate_raw_data_csv():
                 df['date'] = df['date'].apply(
                     lambda x: x.strftime('%Y-%m-%d %H:%M:%S') if isinstance(x, datetime) else x
                 )
+                
+                # Log final DataFrame state before CSV conversion
+                log_dataframe(logger, df, "Final DataFrame Before CSV Export")
             
             # Convert to CSV
             csv_data = df.to_csv(index=False)
+            logger.debug(f"CSV generation successful. Data size: {len(csv_data)} bytes")
             return csv_data
         else:
-            # Return empty CSV with headers if no data
+            logger.warning("No data found for CSV generation")
             return "No data found"
         
     except Exception as e:
         logger.error(f"Error generating raw data CSV: {str(e)}")
         # Create a simple error message CSV
         error_df = pd.DataFrame({"Error": [f"Failed to generate data: {str(e)}"]})
+        log_dataframe(logger, error_df, "Error DataFrame")
         return error_df.to_csv(index=False)
     finally:
         # Make sure we close the connection
@@ -918,7 +930,7 @@ def generate_raw_data_csv():
     
 def main():
     """Main function to run the Streamlit dashboard."""
-    logger.info("Starting dashboard application")
+    logger.debug("Starting dashboard application")
     
     # Dashboard Title
     st.markdown("""
@@ -933,7 +945,7 @@ def main():
     # Refresh Button
     # with col1:
     #     if st.button("🔄 Refresh", use_container_width=True):
-    #         logger.info("Manual refresh triggered")
+    #         logger.debug("Manual refresh triggered")
     #         st.rerun()
     
     # # Add a horizontal line after the controls
@@ -945,7 +957,7 @@ def main():
     # Refresh Button
     with col1:
         if st.button("🔄 Refresh", use_container_width=True):
-            logger.info("Manual refresh triggered")
+            logger.debug("Manual refresh triggered")
             st.rerun()
             
     with col3:
@@ -958,7 +970,7 @@ def main():
             use_container_width=True
         ):
             # This will run after download but no UI will show
-            logger.info("Raw data export triggered")
+            logger.debug("Raw data export triggered")
     
     # Get all required data
     total_engagements = get_total_engagements()
@@ -1625,7 +1637,7 @@ def main():
 
             st.plotly_chart(fig_trends, use_container_width=True)
         else:
-            st.info("No data available for the selected date range.")
+            st.debug("No data available for the selected date range.")
 
     # Create a single set of columns for both headers and charts
     col1, col2 = st.columns([1, 1])
