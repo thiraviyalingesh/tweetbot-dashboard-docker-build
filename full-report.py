@@ -930,7 +930,7 @@ def main():
     # # Single column for refresh button
     # col1, col2 = st.columns([1, 11])
     
-    # # Refresh Button
+    # Refresh Button
     # with col1:
     #     if st.button("🔄 Refresh", use_container_width=True):
     #         logger.info("Manual refresh triggered")
@@ -1337,6 +1337,19 @@ def main():
                     max_value=today
                 )
                 st.session_state.custom_end_date = selected_end
+
+            # Validate date range
+            if selected_start > selected_end:
+                st.markdown('<p style="color:black;">Start date cannot be after end date. Please select a valid date range.</p>', unsafe_allow_html=True)
+                # Swap the dates to fix the range
+                st.session_state.custom_start_date = selected_end
+                st.session_state.custom_end_date = selected_start
+                # Use corrected dates
+                start_date = datetime.combine(selected_end, datetime.min.time())
+                end_date = datetime.combine(selected_start, datetime.max.time())
+            else:
+                start_date = datetime.combine(selected_start, datetime.min.time())
+                end_date = datetime.combine(selected_end, datetime.max.time())
         
         # Calculate date range based on selected filter
         end_date = datetime.now().replace(hour=23, minute=59, second=59)
@@ -1348,15 +1361,24 @@ def main():
         elif st.session_state.date_filter_selected == "lastQ":
             # Calculate start of the last quarter
             current_month = end_date.month
-            quarter_month = ((current_month - 1) // 3) * 3 + 1
+            quarter_month = ((current_month - 1) // 3) * 3 + 1  # Find start month of current quarter
+            
+            # If we're in the first month of a quarter (Jan/Apr/Jul/Oct)
             if quarter_month == current_month:
-                # If we're in the first month of a quarter, get previous quarter
+                # If January, go back to Q4 of previous year
                 if current_month == 1:
-                    start_date = datetime(end_date.year - 1, 10, 1)
+                    start_date = datetime(end_date.year - 1, 10, 1)  # Q4 start (Oct 1)
                 else:
-                    start_date = datetime(end_date.year, quarter_month - 3, 1)
+                    start_date = datetime(end_date.year, quarter_month - 3, 1)  # Previous quarter start
             else:
-                start_date = datetime(end_date.year, quarter_month, 1)
+                start_date = datetime(end_date.year, quarter_month, 1)  # Current quarter start
+
+            # Example: If today is March 15, 2024
+            # quarter_month would be 1 (Jan)
+            # This would show Q1 2024 (Jan 1 - Mar 15)
+            
+            # If today is April 2, 2024
+            # It would show Q1 2024 (Jan 1 - Mar 31)
         elif st.session_state.date_filter_selected == "ytd":
             start_date = datetime(end_date.year, 1, 1)
         else:  # custom
@@ -1365,29 +1387,11 @@ def main():
         
         # Get filtered time series data
         time_series_data = get_engagement_time_series_with_filter(start_date, end_date)
-        
-        # Display a date range indicator
-        formatted_start = start_date.strftime("%b %d, %Y")
-        formatted_end = end_date.strftime("%b %d, %Y")
-        
-        st.markdown(f"""
-        <div style="background-color: #FAF3E0; padding: 8px 15px; border-radius: 5px; margin-bottom: 10px; display: flex; align-items: center;">
-            <span style="color: #722F37; font-weight: 600; font-size: 14px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 6px;">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-                Currently viewing: {formatted_start} - {formatted_end}
-            </span>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # This code completely removes zero values from the time series chart
-        # Place this inside the "with col2:" section after the date range indicator
 
         if not time_series_data.empty:
+            # Filter out zero values for x-axis display
+            non_zero_data = time_series_data[time_series_data['engagements'] > 0]
+            
             # Find maximum value
             max_value = time_series_data['engagements'].max()
             if max_value == 0:
@@ -1396,31 +1400,12 @@ def main():
             # Calculate a proportional minimum value based on max_value
             fixed_min = -max_value * 0.05  # Just 5% of max value as padding below zero
             
-            # Create separate datasets for non-zero values (visible) and zero values (for line continuity)
-            visible_df = time_series_data.copy()
-            
-            # For the visible trace, we'll create an array of texts that only shows non-zero values
-            text_array = []
-            for value in visible_df['engagements']:
-                if value == 0:
-                    text_array.append("")  # Empty string for zero values
-                else:
-                    text_array.append(str(int(value)))  # Show labels for non-zero values
-            
-            # Create a custom size array that hides zero markers completely
-            size_array = []
-            for value in visible_df['engagements']:
-                if value == 0:
-                    size_array.append(0)  # Zero size makes the marker invisible
-                else:
-                    size_array.append(10)  # Normal size for non-zero values
-            
             fig_trends = go.Figure()
             
-            # Add the main trace with conditional marker sizes to hide zeros
+            # Add the main trace
             fig_trends.add_trace(go.Scatter(
-                x=visible_df['date'],
-                y=visible_df['engagements'],
+                x=time_series_data['date'],
+                y=time_series_data['engagements'],
                 mode='lines+markers+text',
                 name='Engagements',
                 line=dict(
@@ -1430,10 +1415,10 @@ def main():
                     smoothing=1.3
                 ),
                 marker=dict(
-                    size=size_array,  # Use our size array to hide zero markers
+                    size=[10 if val > 0 else 0 for val in time_series_data['engagements']],
                     color='#1DA1F2'
                 ),
-                text=text_array,  # Use our conditional text array
+                text=[str(int(val)) if val > 0 else "" for val in time_series_data['engagements']],
                 textposition='top center',
                 textfont=dict(
                     size=14, 
@@ -1447,7 +1432,8 @@ def main():
                 plot_bgcolor='#FAF3E0',
                 paper_bgcolor='#FAF3E0',
                 height=400,
-                margin=dict(l=40, r=40, t=10, b=60),
+                # Increase left and right margins to prevent label cropping
+                margin=dict(l=60, r=60, t=30, b=60),
                 yaxis=dict(
                     range=[fixed_min, max_value * 1.15],
                     showgrid=False,
@@ -1466,17 +1452,176 @@ def main():
                     showline=True,
                     linewidth=1,
                     linecolor='black',
-                    tickfont=dict(size=12, color='#000000', family='Arial Black')
+                    tickfont=dict(size=12, color='#000000', family='Arial Black'),
+                    # Use non_zero_data for tick values
+                    tickmode='array',
+                    ticktext=[d.strftime("%b %d") for d in non_zero_data['date']],
+                    tickvals=non_zero_data['date'],
+                    range=[
+                        start_date - timedelta(hours=12),  # Add padding to prevent label cropping
+                        end_date + timedelta(hours=12)
+                    ]
                 )
             )
-            
-            # For better readability with few points (like Last 7d view)
-            if len(time_series_data) <= 10:
-                # Ensure x-axis has nice breaks for short date ranges
+
+            # Special handling for Last 7 days
+            if st.session_state.date_filter_selected == "last7d":
+                # Ensure exactly 7 days
+                end_date = datetime.now().replace(hour=23, minute=59, second=59)
+                start_date = (end_date - timedelta(days=6)).replace(hour=0, minute=0, second=0)
+                
+                # Create array of all 7 dates regardless of data
+                all_dates = pd.date_range(start=start_date, end=end_date, freq='D')
+                
                 fig_trends.update_xaxes(
-                    dtick="D1",  # Daily ticks
-                    tickformat="%b %d"  # Format as "Mar 12"
+                    range=[
+                        start_date - timedelta(hours=12),
+                        end_date + timedelta(hours=12)
+                    ],
+                    tickmode='array',
+                    ticktext=[d.strftime("%B %d") for d in all_dates],  # Changed to "March 14" format
+                    tickvals=all_dates,
+                    tickangle=0,  # Horizontal labels
+                    tickfont=dict(size=10, color='#000000', family='Arial Black')  # Smaller font for longer labels
                 )
+            elif st.session_state.date_filter_selected == "last30d":
+                # Ensure exactly 30 days
+                end_date = datetime.now().replace(hour=23, minute=59, second=59)
+                start_date = (end_date - timedelta(days=29)).replace(hour=0, minute=0, second=0)
+                
+                fig_trends.update_xaxes(
+                    range=[
+                        start_date - timedelta(hours=12),  # Start from exactly 30 days ago
+                        end_date + timedelta(hours=12)
+                    ],
+                    showticklabels=False,  # Hide x-axis labels
+                    showline=True,
+                    linewidth=1,
+                    linecolor='black'
+                )
+                
+                # Update hover template to show full date
+                fig_trends.update_traces(
+                    hovertemplate="<b>%{x|%B %d}</b><br>" +
+                                "Engagements: %{y}<br>" +
+                                "<extra></extra>"
+                )
+            elif st.session_state.date_filter_selected == "lastQ":
+                # Calculate start of the last quarter
+                current_month = end_date.month
+                quarter_month = ((current_month - 1) // 3) * 3 + 1  # Find start month of current quarter
+                
+                # If we're in the first month of a quarter (Jan/Apr/Jul/Oct)
+                if quarter_month == current_month:
+                    # If January, go back to Q4 of previous year
+                    if current_month == 1:
+                        start_date = datetime(end_date.year - 1, 10, 1)  # Q4 start (Oct 1)
+                    else:
+                        start_date = datetime(end_date.year, quarter_month - 3, 1)  # Previous quarter start
+                else:
+                    start_date = datetime(end_date.year, quarter_month, 1)  # Current quarter start
+
+                # Example: If today is March 15, 2024
+                # quarter_month would be 1 (Jan)
+                # This would show Q1 2024 (Jan 1 - Mar 15)
+                
+                # If today is April 2, 2024
+                # It would show Q1 2024 (Jan 1 - Mar 31)
+                
+                fig_trends.update_xaxes(
+                    range=[
+                        start_date - timedelta(hours=12),  # Start from beginning of quarter
+                        end_date + timedelta(hours=12)
+                    ],
+                    showticklabels=False,  # Hide x-axis labels
+                    showline=True,
+                    linewidth=1,
+                    linecolor='black'
+                )
+                
+                # Update hover template to show full date
+                fig_trends.update_traces(
+                    hovertemplate="<b>%{x|%B %d}</b><br>" +
+                                "Engagements: %{y}<br>" +
+                                "<extra></extra>"  # Removes trace name from hover
+                )
+            elif st.session_state.date_filter_selected == "ytd":
+                # YTD date range is already calculated (Jan 1 to current date)
+                fig_trends.update_xaxes(
+                    range=[
+                        start_date - timedelta(hours=12),  # Start from Jan 1
+                        end_date + timedelta(hours=12)
+                    ],
+                    showticklabels=False,  # Hide x-axis labels
+                    showline=True,
+                    linewidth=1,
+                    linecolor='black'
+                )
+                
+                # Update hover template to show full date
+                fig_trends.update_traces(
+                    hovertemplate="<b>%{x|%B %d}</b><br>" +
+                                "Engagements: %{y}<br>" +
+                                "<extra></extra>"
+                )
+            elif st.session_state.date_filter_selected == "custom":
+                fig_trends.update_xaxes(
+                    range=[
+                        start_date - timedelta(hours=12),
+                        end_date + timedelta(hours=12)
+                    ],
+                    showticklabels=False,  # Hide x-axis labels
+                    showline=True,
+                    linewidth=1,
+                    linecolor='black'
+                )
+                
+                # Update hover template to show full date
+                fig_trends.update_traces(
+                    hovertemplate="<b>%{x|%B %d}</b><br>" +
+                                "Engagements: %{y}<br>" +
+                                "<extra></extra>"
+                )
+            else:
+                # For Last 30 days and other ranges
+                fig_trends.update_xaxes(
+                    range=[
+                        non_zero_data['date'].min() - timedelta(hours=12),  # Align with first data point
+                        non_zero_data['date'].max() + timedelta(hours=12)
+                    ],
+                    showticklabels=False,  # Hide x-axis labels
+                    showline=True,
+                    linewidth=1,
+                    linecolor='black'
+                )
+                
+                # Update hover template to show full date
+                fig_trends.update_traces(
+                    hovertemplate="<b>%{x|%B %d}</b><br>" +
+                                  "Engagements: %{y}<br>" +
+                                  "<extra></extra>"  # Removes trace name from hover
+                )
+
+            # Update layout for both cases
+            fig_trends.update_layout(
+                plot_bgcolor='#FAF3E0',
+                paper_bgcolor='#FAF3E0',
+                height=400,
+                margin=dict(l=60, r=60, t=30, b=60),
+                yaxis=dict(
+                    range=[fixed_min, max_value * 1.15],
+                    showgrid=False,
+                    showticklabels=True,
+                    showline=True,
+                    linewidth=1,
+                    linecolor='black',
+                    tickfont=dict(size=12, color='#000000', family='Arial Black'),
+                    zeroline=True,
+                    zerolinecolor='black',
+                    zerolinewidth=1
+                ),
+                width=None  # This allows the chart to use full container width
+            )
 
             st.plotly_chart(fig_trends, use_container_width=True)
         else:
