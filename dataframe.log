@@ -1,107 +1,16 @@
-2025-03-16 15:30:19,321 - __main__ - DEBUG - full-report.py - 933 - Starting dashboard application
-2025-03-16 15:30:20,292 - __main__ - DEBUG - logger.py - 41 - 
-==================================================
-2025-03-16 15:30:20,294 - __main__ - DEBUG - logger.py - 42 - DataFrame Operation: Initial Raw Data Before Processing
-2025-03-16 15:30:20,294 - __main__ - DEBUG - logger.py - 43 - Shape: (1728, 12)
-2025-03-16 15:30:20,294 - __main__ - DEBUG - logger.py - 44 - Columns: ['profile_id', 'date', 'name', 'action', 'post_content', 'username', 'translated_comments', 'media_link', 'result', 'rerun', 'id', 'date_only']
-2025-03-16 15:30:20,297 - __main__ - DEBUG - logger.py - 45 - Data Types:
-profile_id             object
-date                   object
-name                   object
-action                 object
-post_content           object
-username               object
-translated_comments    object
-media_link             object
-result                 object
-rerun                  object
-id                     object
-date_only              object
-dtype: object
-2025-03-16 15:30:20,310 - __main__ - DEBUG - logger.py - 46 - First few rows:
-                             profile_id                        date                  name action  ...                     result rerun    id            date_only
-0  c325b3b8-33ab-4ec4-96f7-8f37ce5dff04  2025-03-06 12:44:24.250000      SENTHIL_MAANIKAM   like  ...  Like Success through link        1675                  NaN
-1  87963ccb-16e8-4315-95bb-ab07d9053b75  2025-03-06 12:58:57.408000  DHANDAPANI_MURUGESAN   like  ...  Like Success through link        1676  2025-03-06 00:00:00
-2  605a73e7-b8c9-4785-861c-e8ccf6d67a41  2025-03-06 13:16:01.814000      AATHISESHAN_VELU   like  ...  Like Success through link        1677  2025-03-06 00:00:00
-3  605a73e7-b8c9-4785-861c-e8ccf6d67a41  2025-03-06 16:01:38.998000      AATHISESHAN_VELU   like  ...  Like Success through link        1678  2025-03-06 00:00:00
-4  7c255f4f-0285-4cc9-94b8-2d3889896579  2025-03-06 19:38:52.938000       VINOTHANAN_BALU   like  ...     Failed to Perform task        1679  2025-03-06 00:00:00
-
-[5 rows x 12 columns]
-2025-03-16 15:30:20,311 - __main__ - DEBUG - logger.py - 47 - ==================================================
-
-2025-03-16 15:30:20,314 - __main__ - DEBUG - logger.py - 41 - 
-==================================================
-2025-03-16 15:30:20,315 - __main__ - DEBUG - logger.py - 42 - DataFrame Operation: After Date String Conversion
-2025-03-16 15:30:20,315 - __main__ - DEBUG - logger.py - 43 - Shape: (1728, 12)
-2025-03-16 15:30:20,315 - __main__ - DEBUG - logger.py - 44 - Columns: ['profile_id', 'date', 'name', 'action', 'post_content', 'username', 'translated_comments', 'media_link', 'result', 'rerun', 'id', 'date_only']
-2025-03-16 15:30:20,318 - __main__ - DEBUG - logger.py - 45 - Data Types:
-profile_id             object
-date                   object
-name                   object
-action                 object
-post_content           object
-username               object
-translated_comments    object
-media_link             object
-result                 object
-rerun                  object
-id                     object
-date_only              object
-dtype: object
-2025-03-16 15:30:20,331 - __main__ - DEBUG - logger.py - 46 - First few rows:
-                             profile_id                        date                  name action  ...                     result rerun    id            date_only
-0  c325b3b8-33ab-4ec4-96f7-8f37ce5dff04  2025-03-06 12:44:24.250000      SENTHIL_MAANIKAM   like  ...  Like Success through link        1675                  NaN
-1  87963ccb-16e8-4315-95bb-ab07d9053b75  2025-03-06 12:58:57.408000  DHANDAPANI_MURUGESAN   like  ...  Like Success through link        1676  2025-03-06 00:00:00
-2  605a73e7-b8c9-4785-861c-e8ccf6d67a41  2025-03-06 13:16:01.814000      AATHISESHAN_VELU   like  ...  Like Success through link        1677  2025-03-06 00:00:00
-3  605a73e7-b8c9-4785-861c-e8ccf6d67a41  2025-03-06 16:01:38.998000      AATHISESHAN_VELU   like  ...  Like Success through link        1678  2025-03-06 00:00:00
-4  7c255f4f-0285-4cc9-94b8-2d3889896579  2025-03-06 19:38:52.938000       VINOTHANAN_BALU   like  ...     Failed to Perform task        1679  2025-03-06 00:00:00
-
-[5 rows x 12 columns]
-2025-03-16 15:30:20,332 - __main__ - DEBUG - logger.py - 47 - ==================================================
-
-2025-03-16 15:30:20,632 - __main__ - DEBUG - logger.py - 41 - 
-==================================================
-2025-03-16 15:30:20,633 - __main__ - DEBUG - logger.py - 42 - DataFrame Operation: Final DataFrame Before CSV Export
-2025-03-16 15:30:20,633 - __main__ - DEBUG - logger.py - 43 - Shape: (1728, 12)
-2025-03-16 15:30:20,634 - __main__ - DEBUG - logger.py - 44 - Columns: ['profile_id', 'date', 'name', 'action', 'post_content', 'username', 'translated_comments', 'media_link', 'result', 'rerun', 'id', 'date_only']
-2025-03-16 15:30:20,635 - __main__ - DEBUG - logger.py - 45 - Data Types:
-profile_id             object
-date                   object
-name                   object
-action                 object
-post_content           object
-username               object
-translated_comments    object
-media_link             object
-result                 object
-rerun                  object
-id                     object
-date_only              object
-dtype: object
-2025-03-16 15:30:20,651 - __main__ - DEBUG - logger.py - 46 - First few rows:
-                             profile_id                 date                  name action  ...                     result rerun    id            date_only
-0  c325b3b8-33ab-4ec4-96f7-8f37ce5dff04  2025-03-06 12:44:24      SENTHIL_MAANIKAM   like  ...  Like Success through link        1675                  NaN
-1  87963ccb-16e8-4315-95bb-ab07d9053b75  2025-03-06 12:58:57  DHANDAPANI_MURUGESAN   like  ...  Like Success through link        1676  2025-03-06 00:00:00
-2  605a73e7-b8c9-4785-861c-e8ccf6d67a41  2025-03-06 13:16:01      AATHISESHAN_VELU   like  ...  Like Success through link        1677  2025-03-06 00:00:00
-3  605a73e7-b8c9-4785-861c-e8ccf6d67a41  2025-03-06 16:01:38      AATHISESHAN_VELU   like  ...  Like Success through link        1678  2025-03-06 00:00:00
-4  7c255f4f-0285-4cc9-94b8-2d3889896579  2025-03-06 19:38:52       VINOTHANAN_BALU   like  ...     Failed to Perform task        1679  2025-03-06 00:00:00
-
-[5 rows x 12 columns]
-2025-03-16 15:30:20,652 - __main__ - DEBUG - logger.py - 47 - ==================================================
-
-2025-03-16 15:30:20,677 - __main__ - DEBUG - full-report.py - 914 - CSV generation successful. Data size: 502757 bytes
-2025-03-16 15:30:20,786 - __main__ - DEBUG - full-report.py - 973 - Raw data export triggered
-2025-03-16 15:30:20,788 - __main__ - DEBUG - full-report.py - 421 - Fetching total engagements
-2025-03-16 15:30:21,553 - __main__ - DEBUG - full-report.py - 436 - Found 1728 total engagements
-2025-03-16 15:30:21,553 - __main__ - DEBUG - full-report.py - 453 - Fetching successful engagements
-2025-03-16 15:30:22,189 - __main__ - DEBUG - full-report.py - 492 - Calculating success ratio
-2025-03-16 15:30:22,190 - __main__ - DEBUG - full-report.py - 421 - Fetching total engagements
-2025-03-16 15:30:22,854 - __main__ - DEBUG - full-report.py - 436 - Found 1728 total engagements
-2025-03-16 15:30:22,854 - __main__ - DEBUG - full-report.py - 453 - Fetching successful engagements
-2025-03-16 15:30:23,493 - __main__ - DEBUG - full-report.py - 500 - Success ratio: 93.63%
-2025-03-16 15:30:24,160 - __main__ - DEBUG - full-report.py - 652 - Fetching user engagement data
-2025-03-16 15:30:24,933 - __main__ - DEBUG - full-report.py - 672 - Found 5 user records
-2025-03-16 15:30:24,933 - __main__ - DEBUG - full-report.py - 514 - Fetching engagement time series data
-2025-03-16 15:30:25,564 - __main__ - DEBUG - full-report.py - 693 - Fetching rerun comparison data using Excel formula logic
-2025-03-16 15:30:26,340 - __main__ - DEBUG - full-report.py - 779 - Metrics found - Initial: {'likes': 454, 'retweets': 433, 'comments': 597}, Rerun: {'likes': 502, 'retweets': 465, 'comments': 652}
-2025-03-16 15:30:26,404 - __main__ - DEBUG - full-report.py - 800 - Fetching engagement time series data from 2025-03-10 00:00:00.404415 to 2025-03-16 23:59:59.404415
+2025-03-17 11:29:37,059 - __main__ - DEBUG - full-report.py - 920 - Starting dashboard application
+2025-03-17 11:29:38,179 - __main__ - DEBUG - full-report.py - 905 - Excel generation successful. Data size: 131918 bytes
+2025-03-17 11:29:38,231 - __main__ - DEBUG - full-report.py - 422 - Fetching total engagements
+2025-03-17 11:29:39,063 - __main__ - DEBUG - full-report.py - 437 - Found 1730 total engagements
+2025-03-17 11:29:39,063 - __main__ - DEBUG - full-report.py - 454 - Fetching successful engagements
+2025-03-17 11:29:39,748 - __main__ - DEBUG - full-report.py - 493 - Calculating success ratio
+2025-03-17 11:29:39,749 - __main__ - DEBUG - full-report.py - 422 - Fetching total engagements
+2025-03-17 11:29:40,323 - __main__ - DEBUG - full-report.py - 437 - Found 1730 total engagements
+2025-03-17 11:29:40,323 - __main__ - DEBUG - full-report.py - 454 - Fetching successful engagements
+2025-03-17 11:29:41,036 - __main__ - DEBUG - full-report.py - 501 - Success ratio: 93.64%
+2025-03-17 11:29:41,659 - __main__ - DEBUG - full-report.py - 653 - Fetching user engagement data
+2025-03-17 11:29:42,236 - __main__ - DEBUG - full-report.py - 673 - Found 5 user records
+2025-03-17 11:29:42,236 - __main__ - DEBUG - full-report.py - 515 - Fetching engagement time series data
+2025-03-17 11:29:42,901 - __main__ - DEBUG - full-report.py - 694 - Fetching rerun comparison data using Excel formula logic
+2025-03-17 11:29:43,544 - __main__ - DEBUG - full-report.py - 780 - Metrics found - Initial: {'likes': 455, 'retweets': 433, 'comments': 598}, Rerun: {'likes': 503, 'retweets': 465, 'comments': 653}
+2025-03-17 11:29:43,577 - __main__ - DEBUG - full-report.py - 801 - Fetching engagement time series data from 2025-03-11 00:00:00.577029 to 2025-03-17 23:59:59.577029

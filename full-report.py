@@ -10,6 +10,7 @@ import plotly.express as px
 from datetime import datetime, timedelta
 import logging
 from logger import setup_logger, log_dataframe
+import io
 
 # Configure logging
 logging.basicConfig(
@@ -857,13 +858,13 @@ def get_engagement_time_series_with_filter(start_date=None, end_date=None):
     except Exception as e:
         logger.error(f"Error fetching time series data: {str(e)}")
         return pd.DataFrame()
-def generate_raw_data_csv():
+def generate_raw_data_excel():
     """
-    Generate a CSV file with all raw data directly from the database.
+    Generate an Excel file with all raw data directly from the database.
     Handles potential data type issues with robust error handling.
     
     Returns:
-        str: CSV data as string
+        bytes: Excel file as bytes
     """
     try:
         # Connect to MongoDB
@@ -878,53 +879,39 @@ def generate_raw_data_csv():
         if all_data:
             df = pd.DataFrame(all_data)
             
-            # Log initial DataFrame state
-            log_dataframe(logger, df, "Initial Raw Data Before Processing")
-            
             # Handle date conversion with robust error handling
             if 'date' in df.columns:
-                # First convert any problematic data types to strings
                 df['date'] = df['date'].apply(lambda x: str(x) if not isinstance(x, (str, datetime)) else x)
                 
-                # Log after initial date conversion
-                log_dataframe(logger, df, "After Date String Conversion")
-                
-                # Then try to parse dates with error handling
                 def safe_date_parse(date_str):
                     try:
                         if pd.isna(date_str) or date_str == '':
                             return date_str
                         return pd.to_datetime(date_str)
                     except:
-                        return date_str  # Keep as string if parsing fails
+                        return date_str
                 
-                # Apply safe conversion
                 df['date'] = df['date'].apply(safe_date_parse)
-                
-                # Format dates where conversion succeeded
                 df['date'] = df['date'].apply(
                     lambda x: x.strftime('%Y-%m-%d %H:%M:%S') if isinstance(x, datetime) else x
                 )
-                
-                # Log final DataFrame state before CSV conversion
-                log_dataframe(logger, df, "Final DataFrame Before CSV Export")
             
-            # Convert to CSV
-            csv_data = df.to_csv(index=False)
-            logger.debug(f"CSV generation successful. Data size: {len(csv_data)} bytes")
-            return csv_data
+            # Convert to Excel
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                df.to_excel(writer, index=False, sheet_name='Data')
+            excel_data = output.getvalue()
+            
+            logger.debug(f"Excel generation successful. Data size: {len(excel_data)} bytes")
+            return excel_data
         else:
-            logger.warning("No data found for CSV generation")
-            return "No data found"
+            logger.warning("No data found for Excel generation")
+            return None
         
     except Exception as e:
-        logger.error(f"Error generating raw data CSV: {str(e)}")
-        # Create a simple error message CSV
-        error_df = pd.DataFrame({"Error": [f"Failed to generate data: {str(e)}"]})
-        log_dataframe(logger, error_df, "Error DataFrame")
-        return error_df.to_csv(index=False)
+        logger.error(f"Error generating Excel file: {str(e)}")
+        return None
     finally:
-        # Make sure we close the connection
         if 'client' in locals():
             client.close()
     
@@ -961,15 +948,14 @@ def main():
             st.rerun()
             
     with col3:
-        # Direct download of raw data when button is clicked
+        # Direct download of raw data as Excel when button is clicked
         if st.download_button(
-            label="Download CSV",
-            data=generate_raw_data_csv(),  # Generate data directly on click
-            file_name=f"Buzztracker_Tweetbot_DB_Data_{datetime.now().strftime('%Y-%m-%d')}.csv", 
-            mime="text/csv",
+            label="Download Excel",
+            data=generate_raw_data_excel(),  # Generate Excel data directly on click
+            file_name=f"Buzztracker_Tweetbot_DB_Data_{datetime.now().strftime('%Y-%m-%d')}.xlsx", 
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             use_container_width=True
         ):
-            # This will run after download but no UI will show
             logger.debug("Raw data export triggered")
     
     # Get all required data
@@ -1618,7 +1604,7 @@ def main():
             fig_trends.update_layout(
                 plot_bgcolor='#FAF3E0',
                 paper_bgcolor='#FAF3E0',
-                height=400,
+                height=450, # Updated for DATA FILTER CHART & EVEN PURPSOE
                 margin=dict(l=60, r=60, t=30, b=60),
                 yaxis=dict(
                     range=[fixed_min, max_value * 1.15],
