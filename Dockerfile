@@ -8,7 +8,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.4.9 /uv /bin/uv
 
 RUN /bin/uv sync
 RUN /bin/uv add streamlit
-RUN /bin/uv add pandas plotly pymongo python-dotenv
+RUN /bin/uv add pandas plotly pymongo python-dotenv xlsxwriter
 
 # Set environment variables
 ENV PYTHONPATH=/app

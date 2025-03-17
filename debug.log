@@ -1019,3 +1019,103 @@ dtype: object
 2025-03-17 11:29:42,901 - __main__ - DEBUG - full-report.py - 694 - Fetching rerun comparison data using Excel formula logic
 2025-03-17 11:29:43,544 - __main__ - DEBUG - full-report.py - 780 - Metrics found - Initial: {'likes': 455, 'retweets': 433, 'comments': 598}, Rerun: {'likes': 503, 'retweets': 465, 'comments': 653}
 2025-03-17 11:29:43,577 - __main__ - DEBUG - full-report.py - 801 - Fetching engagement time series data from 2025-03-11 00:00:00.577029 to 2025-03-17 23:59:59.577029
+2025-03-17 11:32:59,355 - __main__ - DEBUG - full-report.py - 920 - Starting dashboard application
+2025-03-17 11:33:00,691 - __main__ - DEBUG - full-report.py - 905 - Excel generation successful. Data size: 131917 bytes
+2025-03-17 11:33:00,737 - __main__ - DEBUG - full-report.py - 422 - Fetching total engagements
+2025-03-17 11:33:01,442 - __main__ - DEBUG - full-report.py - 437 - Found 1730 total engagements
+2025-03-17 11:33:01,442 - __main__ - DEBUG - full-report.py - 454 - Fetching successful engagements
+2025-03-17 11:33:02,028 - __main__ - DEBUG - full-report.py - 493 - Calculating success ratio
+2025-03-17 11:33:02,028 - __main__ - DEBUG - full-report.py - 422 - Fetching total engagements
+2025-03-17 11:33:02,629 - __main__ - DEBUG - full-report.py - 437 - Found 1730 total engagements
+2025-03-17 11:33:02,629 - __main__ - DEBUG - full-report.py - 454 - Fetching successful engagements
+2025-03-17 11:33:03,331 - __main__ - DEBUG - full-report.py - 501 - Success ratio: 93.64%
+2025-03-17 11:33:03,925 - __main__ - DEBUG - full-report.py - 653 - Fetching user engagement data
+2025-03-17 11:33:04,637 - __main__ - DEBUG - full-report.py - 673 - Found 5 user records
+2025-03-17 11:33:04,637 - __main__ - DEBUG - full-report.py - 515 - Fetching engagement time series data
+2025-03-17 11:33:05,317 - __main__ - DEBUG - full-report.py - 694 - Fetching rerun comparison data using Excel formula logic
+2025-03-17 11:33:05,996 - __main__ - DEBUG - full-report.py - 780 - Metrics found - Initial: {'likes': 455, 'retweets': 433, 'comments': 598}, Rerun: {'likes': 503, 'retweets': 465, 'comments': 653}
+2025-03-17 11:33:06,138 - __main__ - DEBUG - full-report.py - 801 - Fetching engagement time series data from 2025-03-11 00:00:00.138009 to 2025-03-17 23:59:59.138009
+2025-03-17 11:35:03,969 - __main__ - DEBUG - full-report.py - 920 - Starting dashboard application
+2025-03-17 11:35:05,357 - __main__ - DEBUG - full-report.py - 905 - Excel generation successful. Data size: 131917 bytes
+2025-03-17 11:35:05,417 - __main__ - DEBUG - full-report.py - 959 - Raw data export triggered
+2025-03-17 11:35:05,418 - __main__ - DEBUG - full-report.py - 422 - Fetching total engagements
+2025-03-17 11:35:06,065 - __main__ - DEBUG - full-report.py - 437 - Found 1730 total engagements
+2025-03-17 11:35:06,065 - __main__ - DEBUG - full-report.py - 454 - Fetching successful engagements
+2025-03-17 11:35:06,782 - __main__ - DEBUG - full-report.py - 493 - Calculating success ratio
+2025-03-17 11:35:06,783 - __main__ - DEBUG - full-report.py - 422 - Fetching total engagements
+2025-03-17 11:35:07,417 - __main__ - DEBUG - full-report.py - 437 - Found 1730 total engagements
+2025-03-17 11:35:07,418 - __main__ - DEBUG - full-report.py - 454 - Fetching successful engagements
+2025-03-17 11:35:08,028 - __main__ - DEBUG - full-report.py - 501 - Success ratio: 93.64%
+2025-03-17 11:35:08,718 - __main__ - DEBUG - full-report.py - 653 - Fetching user engagement data
+2025-03-17 11:35:09,319 - __main__ - DEBUG - full-report.py - 673 - Found 5 user records
+2025-03-17 11:35:09,320 - __main__ - DEBUG - full-report.py - 515 - Fetching engagement time series data
+2025-03-17 11:35:09,925 - __main__ - DEBUG - full-report.py - 694 - Fetching rerun comparison data using Excel formula logic
+2025-03-17 11:35:10,817 - __main__ - DEBUG - full-report.py - 780 - Metrics found - Initial: {'likes': 455, 'retweets': 433, 'comments': 598}, Rerun: {'likes': 503, 'retweets': 465, 'comments': 653}
+2025-03-17 11:35:10,859 - __main__ - DEBUG - full-report.py - 801 - Fetching engagement time series data from 2025-03-11 00:00:00.859596 to 2025-03-17 23:59:59.859596
+2025-03-17 11:36:10,020 - __main__ - DEBUG - full-report.py - 920 - Starting dashboard application
+2025-03-17 11:36:11,386 - __main__ - DEBUG - full-report.py - 905 - Excel generation successful. Data size: 131917 bytes
+2025-03-17 11:36:11,440 - __main__ - DEBUG - full-report.py - 422 - Fetching total engagements
+2025-03-17 11:36:12,154 - __main__ - DEBUG - full-report.py - 437 - Found 1730 total engagements
+2025-03-17 11:36:12,155 - __main__ - DEBUG - full-report.py - 454 - Fetching successful engagements
+2025-03-17 11:36:12,844 - __main__ - DEBUG - full-report.py - 493 - Calculating success ratio
+2025-03-17 11:36:12,844 - __main__ - DEBUG - full-report.py - 422 - Fetching total engagements
+2025-03-17 11:36:13,559 - __main__ - DEBUG - full-report.py - 437 - Found 1730 total engagements
+2025-03-17 11:36:13,560 - __main__ - DEBUG - full-report.py - 454 - Fetching successful engagements
+2025-03-17 11:36:14,278 - __main__ - DEBUG - full-report.py - 501 - Success ratio: 93.64%
+2025-03-17 11:36:15,018 - __main__ - DEBUG - full-report.py - 653 - Fetching user engagement data
+2025-03-17 11:36:15,758 - __main__ - DEBUG - full-report.py - 673 - Found 5 user records
+2025-03-17 11:36:15,758 - __main__ - DEBUG - full-report.py - 515 - Fetching engagement time series data
+2025-03-17 11:36:16,549 - __main__ - DEBUG - full-report.py - 694 - Fetching rerun comparison data using Excel formula logic
+2025-03-17 11:36:17,237 - __main__ - DEBUG - full-report.py - 780 - Metrics found - Initial: {'likes': 455, 'retweets': 433, 'comments': 598}, Rerun: {'likes': 503, 'retweets': 465, 'comments': 653}
+2025-03-17 11:36:17,271 - __main__ - DEBUG - full-report.py - 801 - Fetching engagement time series data from 2025-03-11 00:00:00.271851 to 2025-03-17 23:59:59.271851
+2025-03-17 11:37:40,264 - __main__ - DEBUG - full-report.py - 920 - Starting dashboard application
+2025-03-17 11:37:40,267 - __main__ - DEBUG - full-report.py - 947 - Manual refresh triggered
+2025-03-17 11:37:40,330 - __main__ - DEBUG - full-report.py - 920 - Starting dashboard application
+2025-03-17 11:37:41,468 - __main__ - DEBUG - full-report.py - 905 - Excel generation successful. Data size: 131988 bytes
+2025-03-17 11:37:41,515 - __main__ - DEBUG - full-report.py - 422 - Fetching total engagements
+2025-03-17 11:37:42,127 - __main__ - DEBUG - full-report.py - 437 - Found 1731 total engagements
+2025-03-17 11:37:42,127 - __main__ - DEBUG - full-report.py - 454 - Fetching successful engagements
+2025-03-17 11:37:42,788 - __main__ - DEBUG - full-report.py - 493 - Calculating success ratio
+2025-03-17 11:37:42,788 - __main__ - DEBUG - full-report.py - 422 - Fetching total engagements
+2025-03-17 11:37:43,369 - __main__ - DEBUG - full-report.py - 437 - Found 1731 total engagements
+2025-03-17 11:37:43,369 - __main__ - DEBUG - full-report.py - 454 - Fetching successful engagements
+2025-03-17 11:37:44,045 - __main__ - DEBUG - full-report.py - 501 - Success ratio: 93.65%
+2025-03-17 11:37:44,701 - __main__ - DEBUG - full-report.py - 653 - Fetching user engagement data
+2025-03-17 11:37:45,332 - __main__ - DEBUG - full-report.py - 673 - Found 5 user records
+2025-03-17 11:37:45,332 - __main__ - DEBUG - full-report.py - 515 - Fetching engagement time series data
+2025-03-17 11:37:45,906 - __main__ - DEBUG - full-report.py - 694 - Fetching rerun comparison data using Excel formula logic
+2025-03-17 11:37:46,568 - __main__ - DEBUG - full-report.py - 780 - Metrics found - Initial: {'likes': 456, 'retweets': 433, 'comments': 598}, Rerun: {'likes': 504, 'retweets': 465, 'comments': 653}
+2025-03-17 11:37:46,597 - __main__ - DEBUG - full-report.py - 801 - Fetching engagement time series data from 2025-03-11 00:00:00.597957 to 2025-03-17 23:59:59.597957
+2025-03-17 11:38:03,757 - __main__ - DEBUG - full-report.py - 920 - Starting dashboard application
+2025-03-17 11:38:05,229 - __main__ - DEBUG - full-report.py - 905 - Excel generation successful. Data size: 131987 bytes
+2025-03-17 11:38:05,287 - __main__ - DEBUG - full-report.py - 959 - Raw data export triggered
+2025-03-17 11:38:05,287 - __main__ - DEBUG - full-report.py - 422 - Fetching total engagements
+2025-03-17 11:38:05,873 - __main__ - DEBUG - full-report.py - 437 - Found 1731 total engagements
+2025-03-17 11:38:05,873 - __main__ - DEBUG - full-report.py - 454 - Fetching successful engagements
+2025-03-17 11:38:06,467 - __main__ - DEBUG - full-report.py - 493 - Calculating success ratio
+2025-03-17 11:38:06,469 - __main__ - DEBUG - full-report.py - 422 - Fetching total engagements
+2025-03-17 11:38:07,111 - __main__ - DEBUG - full-report.py - 437 - Found 1731 total engagements
+2025-03-17 11:38:07,111 - __main__ - DEBUG - full-report.py - 454 - Fetching successful engagements
+2025-03-17 11:38:07,691 - __main__ - DEBUG - full-report.py - 501 - Success ratio: 93.65%
+2025-03-17 11:38:08,350 - __main__ - DEBUG - full-report.py - 653 - Fetching user engagement data
+2025-03-17 11:38:08,982 - __main__ - DEBUG - full-report.py - 673 - Found 5 user records
+2025-03-17 11:38:08,983 - __main__ - DEBUG - full-report.py - 515 - Fetching engagement time series data
+2025-03-17 11:38:09,268 - __main__ - DEBUG - full-report.py - 920 - Starting dashboard application
+2025-03-17 11:38:09,629 - __main__ - DEBUG - full-report.py - 694 - Fetching rerun comparison data using Excel formula logic
+2025-03-17 11:38:10,560 - __main__ - DEBUG - full-report.py - 780 - Metrics found - Initial: {'likes': 456, 'retweets': 433, 'comments': 598}, Rerun: {'likes': 504, 'retweets': 465, 'comments': 653}
+2025-03-17 11:38:10,629 - __main__ - DEBUG - full-report.py - 905 - Excel generation successful. Data size: 131987 bytes
+2025-03-17 11:38:10,700 - __main__ - DEBUG - full-report.py - 959 - Raw data export triggered
+2025-03-17 11:38:10,700 - __main__ - DEBUG - full-report.py - 422 - Fetching total engagements
+2025-03-17 11:38:11,472 - __main__ - DEBUG - full-report.py - 437 - Found 1731 total engagements
+2025-03-17 11:38:11,472 - __main__ - DEBUG - full-report.py - 454 - Fetching successful engagements
+2025-03-17 11:38:12,264 - __main__ - DEBUG - full-report.py - 493 - Calculating success ratio
+2025-03-17 11:38:12,264 - __main__ - DEBUG - full-report.py - 422 - Fetching total engagements
+2025-03-17 11:38:12,943 - __main__ - DEBUG - full-report.py - 437 - Found 1731 total engagements
+2025-03-17 11:38:12,943 - __main__ - DEBUG - full-report.py - 454 - Fetching successful engagements
+2025-03-17 11:38:13,487 - __main__ - DEBUG - full-report.py - 501 - Success ratio: 93.65%
+2025-03-17 11:38:14,081 - __main__ - DEBUG - full-report.py - 653 - Fetching user engagement data
+2025-03-17 11:38:14,717 - __main__ - DEBUG - full-report.py - 673 - Found 5 user records
+2025-03-17 11:38:14,718 - __main__ - DEBUG - full-report.py - 515 - Fetching engagement time series data
+2025-03-17 11:38:15,415 - __main__ - DEBUG - full-report.py - 694 - Fetching rerun comparison data using Excel formula logic
+2025-03-17 11:38:16,149 - __main__ - DEBUG - full-report.py - 780 - Metrics found - Initial: {'likes': 456, 'retweets': 433, 'comments': 598}, Rerun: {'likes': 504, 'retweets': 465, 'comments': 653}
+2025-03-17 11:38:16,185 - __main__ - DEBUG - full-report.py - 801 - Fetching engagement time series data from 2025-03-11 00:00:00.185192 to 2025-03-17 23:59:59.185192
